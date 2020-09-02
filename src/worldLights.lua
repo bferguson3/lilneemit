@@ -50,9 +50,9 @@ worldLights.getLightPositions = function ()
     local o = {}
     for i=1,#worldLights.lights do
         local p = {}
-        p[1] = worldLights.lights[i].position[1] - scaledPlayerPos.x
-        p[2] = worldLights.lights[i].position[2] - scaledPlayerPos.y
-        p[3] = worldLights.lights[i].position[3] - scaledPlayerPos.z
+        p[1] = worldLights.lights[i].position[1] - player.scaledPos.x
+        p[2] = worldLights.lights[i].position[2] - player.scaledPos.y
+        p[3] = worldLights.lights[i].position[3] - player.scaledPos.z
         p[4] = 1.0
         
         table.insert(o, p)

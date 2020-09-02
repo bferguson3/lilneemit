@@ -18,11 +18,25 @@ hx, hy, hz = 0.0, 0.0, 0.0
 
 local rifle_a = nil
 local margaret = nil
+
+PLAYERSTATE = {
+    ['NORMAL'] = 1,
+    ['JUMPING'] = 2,
+    ['FALLING'] = 3
+}
 -- Init values
-playerPosition = { x = 0.0, y = 0.0, z = 0.0 }
-scaledPlayerPos = {}
+player = {
+    pos = { x = 0, y = 0, z = 0 },
+    scaledPos = {},
+    rot = 0,
+    state = PLAYERSTATE['NORMAL'],
+    jumpTimer = 0,
+    jumpHeight = 4
+}
+player.pos = { x = 0.0, y = 0.0, z = 0.0 }
+player.scaledPos = {}
 --hmdOffset = { x = 0, y = -1.0, z = 0 }
-playerRotation = 0.0
+player.rot = 0.0
 worldScale = 1
 local lightBlob = nil
 lightPos = { 0, 0, 0 }
@@ -49,7 +63,7 @@ function lovr.load()
         -- set up logfile
         myDebug.init()
     end
-
+    player.state = PLAYERSTATE.NORMAL
     -- Important note: 
     -- Custom builds of LOVR for Tangram (that fix keyboard input) need to have LOVR_VERSION_MINOR
     --  set to 14 or higher.
@@ -181,14 +195,21 @@ function lovr.update(dT)
     -- Scale player position to match worldScale variable
     hx, hy, hz = lovr.headset.getPosition()
     --hy = hy + hmdOffset.y
-    scaledPlayerPos = {
-        x = playerPosition.x * worldScale + hx,
-        y = playerPosition.y * worldScale + hy,
-        z = playerPosition.z * worldScale + hz,
+    player.scaledPos = {
+        x = player.pos.x * worldScale + hx,
+        y = player.pos.y * worldScale + hy,
+        z = player.pos.z * worldScale + hz,
     }
     
     -- Create camera projection based on scaled world and headset offsets
-    
+    if player.state == PLAYERSTATE.JUMPING then 
+        player.jumpTimer = player.jumpTimer + dT
+        player.pos.y = player.jumpBase + (player.jumpHeight * math.sin(player.jumpTimer))
+        if player.jumpTimer > ((player.jumpHeight-1.7)/2) then 
+            player.state = PLAYERSTATE.FALLING
+            player.jumpTimer = 0
+        end
+    end
     
     -- LIGHTING
     -- quick animation
@@ -206,10 +227,10 @@ function lovr.update(dT)
     specShader:sendBlock('lightBlob', lightBlob)
 
     camera = lovr.math.newMat4():lookAt(
-        vec3(scaledPlayerPos.x, scaledPlayerPos.y, scaledPlayerPos.z),
-        vec3(scaledPlayerPos.x + math.cos(playerRotation), 
-             scaledPlayerPos.y, 
-             scaledPlayerPos.z + math.sin(playerRotation)))
+        vec3(player.scaledPos.x, player.scaledPos.y, player.scaledPos.z),
+        vec3(player.scaledPos.x + math.cos(player.rot), 
+             player.scaledPos.y, 
+             player.scaledPos.z + math.sin(player.rot)))
     lightcam = camera
     view = lovr.math.newMat4(camera):invert()
     
@@ -219,13 +240,13 @@ function lovr.update(dT)
     -- Adjust head position (for specular)
     if lovr.headset then 
         hx, hy, hz = lovr.headset.getPosition()
-        --specShader:send('viewPos', { hx + scaledPlayerPos.x, 
-        --                             hy + scaledPlayerPos.y + hmdOffset.y, 
-        --                             hz + scaledPlayerPos.z, 1.0 } )
+        --specShader:send('viewPos', { hx + player.scaledPos.x, 
+        --                             hy + player.scaledPos.y + hmdOffset.y, 
+        --                             hz + player.scaledPos.z, 1.0 } )
         --shader:send('viewPos', { hx, hy, hz })
     else
         print('WARNING')
-        --specShader:send('viewPos', { playerPosition.x, playerPosition.y, playerPosition.z })
+        --specShader:send('viewPos', { player.pos.x, player.pos.y, player.pos.z })
     end
 end
 
