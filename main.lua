@@ -1,11 +1,10 @@
--- Tangram
+-- Lil Neemit
+-- (c) 2020 Ben Ferguson
 
 -- Load Lua and lovr helper library stuff
 m = lovr.filesystem.load('src/lib.lua'); m()
 
--- Lights class 
 include 'src/worldLights.lua'
-
 include 'src/getInput.lua'
 include 'src/renderScene.lua'
 
@@ -15,10 +14,8 @@ sOperatingSystem = ''
 fFPSAvg = 0.0
 totalFrames = 0
 hx, hy, hz = 0.0, 0.0, 0.0
-
 local rifle_a = nil
 local margaret = nil
-
 PLAYERSTATE = {
     ['NORMAL'] = 1,
     ['JUMPING'] = 2,
@@ -45,16 +42,16 @@ worldScale = 1
 local lightBlob = nil
 lightPos = { 0, 0, 0 }
 adjLightPos = {} 
-
 sunDirection = { -0.25, -1, 0.0 }
 sunColor = { 0.0, 0.0, 0.0, 1.0 }
 worldAmbience = { 0.1, 0.1, 0.1, 1.0 }
-
 minContrast = 0.005
 lovrVer = 0
 --deltaTime = 0
 
+
 function lovr.load()
+
     print(_VERSION)
     local a, b
     a, lovrVer, b = lovr.getVersion()
@@ -68,47 +65,27 @@ function lovr.load()
         -- set up logfile
         myDebug.init()
     end
-    player.state = PLAYERSTATE.NORMAL
     -- Important note: 
     -- Custom builds of LOVR for Tangram (that fix keyboard input) need to have LOVR_VERSION_MINOR
     --  set to 14 or higher.
     if lovrVer <= 13 then 
         print("Controls: \nIJKL - Move \nUO - Turn\nDO NOT USE WASDQE OR ARROWS!") else 
         print("Controls: \nWASD/Up/Down - Move\nQE/Left/Right - Turn") end
-
     if sOperatingSystem ~= 'Android' then 
         lovr.graphics.setDefaultFilter('nearest', 4)
     else
         lovr.graphics.setDefaultFilter('anisotropic', 4)
     end
     
+    player.state = PLAYERSTATE.NORMAL
+
     -- set up shaders
     local defaultVertex = lovr.filesystem.read('src/default.vs')
     local defaultFragment = lovr.filesystem.read('src/default.fs')
     local specularFragment = lovr.filesystem.read('src/default-specular.fs')
     --local wireframeFrag = lovr.filesystem.read('src/wireframe.fs')
     
-    -- Red light -- not as harsh, long range low poer
-    worldLights.createWorldLight(
-        { -3.0, 1.0, -3.0 }, -- position
-        { 1.0, 0.1, 0.1 }, -- RGB
-        { 0, 0.1, 0.1 }, -- CLQ 
-        'flicker', -- not used
-        0.2 -- not used
-    )
-    -- Blue light -- harsh, moderate range
-    worldLights.createWorldLight(
-        { 3.0, 1.0, -2.75 }, 
-        { 0.1, 0.1, 1.0 }, 
-        { 0.0, 0.1, 0.05 }
-    )
-    -- Green light -- dull and short range, all light from it fades after ~6m
-    worldLights.createWorldLight(
-        { -1.0, 3.3, -4.1 }, 
-        { 0.3, 1.0, 0.3 }, 
-        { 0, 0.2, 0.2 }
-    )
-    
+    -- Init light blob 
     lightBlob = lovr.graphics.newShaderBlock(
         'uniform', 
         {
@@ -143,6 +120,28 @@ function lovr.load()
         }}
     )
  
+ -- Red light -- not as harsh, long range low poer
+    worldLights.createWorldLight(
+        { -3.0, 1.0, -3.0 }, -- position
+        { 1.0, 0.1, 0.1 }, -- RGB
+        { 0, 0.1, 0.1 }, -- CLQ 
+        'flicker', -- not used
+        0.2 -- not used
+    )
+    -- Blue light -- harsh, moderate range
+    worldLights.createWorldLight(
+        { 3.0, 1.0, -2.75 }, 
+        { 0.1, 0.1, 1.0 }, 
+        { 0.0, 0.1, 0.05 }
+    )
+    -- Green light -- dull and short range, all light from it fades after ~6m
+    worldLights.createWorldLight(
+        { -1.0, 3.3, -4.1 }, 
+        { 0.3, 1.0, 0.3 }, 
+        { 0, 0.2, 0.2 }
+    )
+    
+    --[[Wire frame shader bs]]
     --wfShader = lovr.graphics.newShader(
     --    defaultVertex, wireframeFrag, { flags = { uniformScale = true }}
    -- )
@@ -150,35 +149,27 @@ function lovr.load()
     --wireframeTex2 = lovr.graphics.newTexture('Sphere.png', 1, 1, 1, 1)
     
     -- load models
-    --lovr.graphics.setDefaultFilter('nearest')
-    --mushtex = lovr.graphics.newTexture('mushbuv.png', 1, 1, 1, 1)
     model = lovr.graphics.newModel('mushboom.glb')--, mushtex)
     --music = lovr.audio.newSource('untitled.ogg', 'static')
     --music:play()
+
     -- load textures
     texGrass = lovr.graphics.newMaterial(lovr.graphics.newTexture('tex/grass128.png', 1, 1, 1, 1))
-    --texGrass = lovr.graphics.newMaterial(lovr.graphics.newTexture('mushroom_top.png', 1, 1, 1, 1))
-
     texStonewall = lovr.graphics.newMaterial(lovr.graphics.newTexture('tex/stonewall128.png', 1, 1, 1))
     
     --lovr.graphics.setDepthTest('greater', true)
     lovr.graphics.setCullingEnabled(true)
-    --a = lovr.graphics.newCanvas(lovr.headset.getDisplayDimensions())
+
 end
  
 function lovr.mirror()
-    --a:renderTo(function()
-    --    lovr.graphics.fill(lovr.headset.getMirrorTexture())
-    --end)
     lovr.graphics.clear()
     lovr.draw()
-    --lovr.graphics.fill(a:getTexture())
 end
 
 
 
 function lovr.update(dT)
-    --print('androidmymyDebug')
     -- Per-frame ticks
     --deltaTime = dT 
     fRenderDelta = os.clock()
@@ -195,9 +186,9 @@ function lovr.update(dT)
         end
     end
     
-
     -- INPUT
     GetInput(dT)
+
     -- Scale player position to match worldScale variable
     hx, hy, hz = lovr.headset.getPosition()
     --hy = hy + hmdOffset.y
@@ -208,9 +199,8 @@ function lovr.update(dT)
         z = lp.pos.z * worldScale + hz,
     }
     
-    -- Create camera projection based on scaled world and headset offsets
-    --playerFallDelta
-    GRAVITY = 2
+    -- Jump position code 
+    local GRAVITY = 2
     local playerYf = lp.pos.y 
     if lp.state == PLAYERSTATE.JUMPING then 
         lp.jumpTimer = lp.jumpTimer + dT
@@ -246,6 +236,8 @@ function lovr.update(dT)
     shader:sendBlock('lightBlob', lightBlob)
     specShader:sendBlock('lightBlob', lightBlob)
 
+    
+    -- Create camera projection based on scaled world and headset offsets
     camera = lovr.math.newMat4():lookAt(
         vec3(lp.scaledPos.x, lp.scaledPos.y, lp.scaledPos.z),
         vec3(lp.scaledPos.x + math.cos(lp.rot), 
@@ -265,12 +257,10 @@ function lovr.update(dT)
         --                             hz + player.scaledPos.z, 1.0 } )
         --shader:send('viewPos', { hx, hy, hz })
     else
-        print('WARNING')
+        print('WARNING - Headset driver failed to load')
         --specShader:send('viewPos', { player.pos.x, player.pos.y, player.pos.z })
     end
 end
-
-
 
 
 
@@ -283,15 +273,12 @@ end
 
 
 
-
 function lovr.quit()
     if sOperatingSystem ~= 'Android' then 
         if myDebug.logFPS then 
             myDebug.print('Average FPS: ' .. round(fFPSAvg/totalFrames, 2))
         end
-    end
-    
+    end    
     print('OK.')
-    
 end
 
