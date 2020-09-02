@@ -31,8 +31,12 @@ player = {
     rot = 0,
     state = PLAYERSTATE['NORMAL'],
     jumpTimer = 0,
-    jumpHeight = 4
+    jumpHeight = 10,
+    jumpBase = 0, 
+    fallBase = 0
 }
+playerYf = 0.0
+playerYDelta = 0.0
 player.pos = { x = 0.0, y = 0.0, z = 0.0 }
 player.scaledPos = {}
 --hmdOffset = { x = 0, y = -1.0, z = 0 }
@@ -48,6 +52,7 @@ worldAmbience = { 0.1, 0.1, 0.1, 1.0 }
 
 minContrast = 0.005
 lovrVer = 0
+--deltaTime = 0
 
 function lovr.load()
     print(_VERSION)
@@ -95,13 +100,13 @@ function lovr.load()
     worldLights.createWorldLight(
         { 3.0, 1.0, -2.75 }, 
         { 0.1, 0.1, 1.0 }, 
-        { 0, 0.5, 0.5 }
+        { 0.0, 0.1, 0.05 }
     )
     -- Green light -- dull and short range, all light from it fades after ~6m
     worldLights.createWorldLight(
         { -1.0, 3.3, -4.1 }, 
         { 0.3, 1.0, 0.3 }, 
-        { 0, 0.2, 0.4 }
+        { 0, 0.2, 0.2 }
     )
     
     lightBlob = lovr.graphics.newShaderBlock(
@@ -175,6 +180,7 @@ end
 function lovr.update(dT)
     --print('androidmymyDebug')
     -- Per-frame ticks
+    --deltaTime = dT 
     fRenderDelta = os.clock()
     totalFrames = totalFrames + 1
     local fr 
@@ -195,19 +201,33 @@ function lovr.update(dT)
     -- Scale player position to match worldScale variable
     hx, hy, hz = lovr.headset.getPosition()
     --hy = hy + hmdOffset.y
-    player.scaledPos = {
-        x = player.pos.x * worldScale + hx,
-        y = player.pos.y * worldScale + hy,
-        z = player.pos.z * worldScale + hz,
+    local lp = player 
+    lp.scaledPos = {
+        x = lp.pos.x * worldScale + hx,
+        y = lp.pos.y * worldScale + hy,
+        z = lp.pos.z * worldScale + hz,
     }
     
     -- Create camera projection based on scaled world and headset offsets
-    if player.state == PLAYERSTATE.JUMPING then 
-        player.jumpTimer = player.jumpTimer + dT
-        player.pos.y = player.jumpBase + (player.jumpHeight * math.sin(player.jumpTimer))
-        if player.jumpTimer > ((player.jumpHeight-1.7)/2) then 
-            player.state = PLAYERSTATE.FALLING
-            player.jumpTimer = 0
+    --playerFallDelta
+    GRAVITY = 2
+    local playerYf = lp.pos.y 
+    if lp.state == PLAYERSTATE.JUMPING then 
+        lp.jumpTimer = lp.jumpTimer + dT
+        lp.pos.y = lp.jumpBase + (lp.jumpHeight * math.sin(lp.jumpTimer)) - (lp.jumpTimer * lp.jumpTimer * GRAVITY)
+        local playerYDelta = lp.pos.y - playerYf 
+        if playerYDelta < 0 then   
+            lp.state = PLAYERSTATE.FALLING
+            lp.jumpTimer = 0
+            lp.fallBase = lp.pos.y
+        end
+    elseif lp.state == PLAYERSTATE.FALLING then 
+        lp.jumpTimer = lp.jumpTimer + dT 
+        lp.pos.y = lp.fallBase - (lp.jumpTimer * lp.jumpTimer * GRAVITY) 
+        if lp.pos.y < 0 then 
+            lp.pos.y = 0  
+            lp.jumpTimer = 0
+            lp.state = PLAYERSTATE.NORMAL 
         end
     end
     
@@ -227,10 +247,10 @@ function lovr.update(dT)
     specShader:sendBlock('lightBlob', lightBlob)
 
     camera = lovr.math.newMat4():lookAt(
-        vec3(player.scaledPos.x, player.scaledPos.y, player.scaledPos.z),
-        vec3(player.scaledPos.x + math.cos(player.rot), 
-             player.scaledPos.y, 
-             player.scaledPos.z + math.sin(player.rot)))
+        vec3(lp.scaledPos.x, lp.scaledPos.y, lp.scaledPos.z),
+        vec3(lp.scaledPos.x + math.cos(lp.rot), 
+             lp.scaledPos.y, 
+             lp.scaledPos.z + math.sin(lp.rot)))
     lightcam = camera
     view = lovr.math.newMat4(camera):invert()
     

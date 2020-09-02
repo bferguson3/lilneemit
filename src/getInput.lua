@@ -37,7 +37,7 @@ function GetInput(dT)
         end
     else
         if lovr.keyboard then 
-            if (player.state == PLAYERSTATE.NORMAL) or (player.state == PLAYERSTATE.JUMPING) then 
+            if (player.state == PLAYERSTATE.NORMAL) or (player.state == PLAYERSTATE.JUMPING) or (player.state == PLAYERSTATE.FALLING) then 
                 if lovr.keyboard.isDown('q')  or lovr.keyboard.isDown('left') then 
                     player.rot = player.rot - playerRotSpd*dT
                 elseif lovr.keyboard.isDown('e')  or lovr.keyboard.isDown('right') then 

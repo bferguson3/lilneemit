@@ -44,7 +44,7 @@ renderScene = function ()
     
     lovr.graphics.setColor(1, 1, 1, 1)
     shader:send('useEmissive', 1)
-    model:draw()
+    model:draw(3, 0, 0, 1)
     shader:send('useEmissive', 0)
 
     -- UNLIT SHADER
