@@ -23,14 +23,14 @@ PLAYERSTATE = {
 }
 -- Init values
 player = {
-    pos = { x = 0, y = 0, z = 0 },
+    pos = { x = 0.0, y = 0.0, z = 0.0 },
     scaledPos = {},
-    rot = 0,
+    rot = 0.0,
     state = PLAYERSTATE['NORMAL'],
-    jumpTimer = 0,
-    jumpHeight = 10,
-    jumpBase = 0, 
-    fallBase = 0
+    jumpTimer = 0.0,
+    jumpHeight = 10.0,
+    jumpBase = 0.0, 
+    fallBase = 0.0
 }
 playerYf = 0.0
 playerYDelta = 0.0
@@ -38,11 +38,11 @@ player.pos = { x = 0.0, y = 0.0, z = 0.0 }
 player.scaledPos = {}
 --hmdOffset = { x = 0, y = -1.0, z = 0 }
 player.rot = 0.0
-worldScale = 1
+worldScale = 1.0
 local lightBlob = nil
-lightPos = { 0, 0, 0 }
+lightPos = { 0.0, 0.0, 0.0 }
 adjLightPos = {} 
-sunDirection = { -0.25, -1, 0.0 }
+sunDirection = { -0.25, -1.0, 0.0 }
 sunColor = { 0.0, 0.0, 0.0, 1.0 }
 worldAmbience = { 0.1, 0.1, 0.1, 1.0 }
 minContrast = 0.005
@@ -74,7 +74,8 @@ function lovr.load()
     if sOperatingSystem ~= 'Android' then 
         lovr.graphics.setDefaultFilter('nearest', 4)
     else
-        lovr.graphics.setDefaultFilter('anisotropic', 4)
+        lovr.graphics.setDefaultFilter('nearest', 1)
+        --lovr.graphics.setDefaultFilter('anisotropic', 4)
     end
     
     player.state = PLAYERSTATE.NORMAL
@@ -124,7 +125,7 @@ function lovr.load()
     worldLights.createWorldLight(
         { -3.0, 1.0, -3.0 }, -- position
         { 1.0, 0.1, 0.1 }, -- RGB
-        { 0, 0.1, 0.1 }, -- CLQ 
+        { 0.0, 0.1, 0.1 }, -- CLQ 
         'flicker', -- not used
         0.2 -- not used
     )
@@ -138,7 +139,7 @@ function lovr.load()
     worldLights.createWorldLight(
         { -1.0, 3.3, -4.1 }, 
         { 0.3, 1.0, 0.3 }, 
-        { 0, 0.2, 0.2 }
+        { 0.0, 0.2, 0.2 }
     )
     
     --[[Wire frame shader bs]]

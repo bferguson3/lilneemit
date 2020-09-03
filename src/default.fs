@@ -42,7 +42,7 @@ vec4 CalcPointLight(vec3 normal, vec4 baseColor, int num)
     //if (attenuation >  0.5) { attenuation = attenuation * 2.0; }
     //if (attenuation <= 0.5) { attenuation = attenuation / 2.0; }
     
-    float abb = floor((attenuation+(1/8))*4) / 4;
+    float abb = floor((attenuation+(1.0/8.0))*4.0) / 4.0;
     attenuation = abb;
     
     //if (attenuation <  0.01) { attenuation = 0.0; }
