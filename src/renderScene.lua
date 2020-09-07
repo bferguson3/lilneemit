@@ -24,29 +24,39 @@ renderScene = function ()
     lovr.graphics.setColor(1.0, 0.0, 1.0, 0.5)
     --wfShader:send('wf', wireframeTex)
     -- draw floor
-    for x = -5, 5 do
-        for z = -5, 5 do 
-            lovr.graphics.cube(texGrass, x * 2, -1, z * 2, 2)
-        end
-    end
+    
 
 -- DISABLE WIREFRAME
     --sDisableWireframe()
     
-    lovr.graphics.cube(texStonewall, -3, 1, -6, 2)
-    lovr.graphics.cube(texStonewall, -3, 1, -8, 2)
-    lovr.graphics.cube(texStonewall, -1, 1, -8, 2)
     
     --specShader:send('metallic', 32)
     --specShader:send('specularStrength', 5.0)
     
-    lovr.graphics.cube(texStonewall, -1, 7, -6, 2)
     
     lovr.graphics.setColor(1, 1, 1, 1)
     shader:send('useEmissive', 1)
+    
     model:draw(3, 0, 0, 1)
-    shader:send('useEmissive', 0)
-
+    model:draw(-3, 0, 0, 1)
+    model:draw(5, 2, -2, 1)
+    model:draw(0, 1, -4, 1)
+    
+    dblock:draw(3, -1.5, 0, 1.5)
+    dblock:draw(5, -1.5, 0, 1.5)
+    dblock:draw(7, -1.5, 0, 1.5)
+    model:draw(5, 2, -2, 1)
+    dblock:draw(1, -1.5, 0, 1.5)
+    
+    
+    --lovr.graphics.newModel('mushboom.glb'):draw(-3, 0, 0)
+    --lovr.graphics.newModel('mushboom.glb'):draw(-6, 0, 0)
+    
+    --dblock:draw(-3, -1.5, 0, 1.5)
+    
+    
+    --shader:send('useEmissive', 0)
+    
     -- UNLIT SHADER
     lovr.graphics.setShader() -- Reset to default/unlit
     worldLights.drawPointLights()

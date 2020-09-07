@@ -8,6 +8,9 @@ include 'src/worldLights.lua'
 include 'src/getInput.lua'
 include 'src/renderScene.lua'
 
+-- VERSION OPTIONS -- 
+DESKTOP = 1 -- set to 0 for HMD based input
+
 -- Globals
 fRenderDelta = 0.0
 sOperatingSystem = ''
@@ -26,12 +29,17 @@ player = {
     pos = { x = 0.0, y = 0.0, z = 0.0 },
     scaledPos = {},
     rot = 0.0,
+    facing = 0.0,
     state = PLAYERSTATE['NORMAL'],
     jumpTimer = 0.0,
     jumpHeight = 10.0,
     jumpBase = 0.0, 
-    fallBase = 0.0
+    fallBase = 0.0,
+    hmd_orient = {},
+    actual_height = 170,
+    yaw = 0.0
 }
+if DESKTOP == 1 then player.actual_height = 220 end 
 playerYf = 0.0
 playerYDelta = 0.0
 player.pos = { x = 0.0, y = 0.0, z = 0.0 }
@@ -49,6 +57,19 @@ minContrast = 0.005
 lovrVer = 0
 --deltaTime = 0
 
+--Platform setup - stage test 
+platforms = { 
+    [1] = {
+        pos = {x=3.0, y=0.0, z=0.0},
+        platform_ofs = 5.0,
+        platform_size = 3.5
+    },
+    [2] = {
+        pos = {x=-3.0, y=0.0, z=0.0},
+        platform_ofs = 5.0,
+        platform_size = 3.5
+    }
+}
 
 function lovr.load()
 
@@ -62,6 +83,7 @@ function lovr.load()
     print('OS detected: ' .. sOperatingSystem)
     if sOperatingSystem ~= 'Android' then 
         lovr.keyboard = require('src/lovr-keyboard')
+        lovr.mouse = require('src/lovr-mouse')
         -- set up logfile
         myDebug.init()
     end
@@ -150,14 +172,17 @@ function lovr.load()
     --wireframeTex2 = lovr.graphics.newTexture('Sphere.png', 1, 1, 1, 1)
     
     -- load models
-    model = lovr.graphics.newModel('mushboom.glb')--, mushtex)
+    model = lovr.graphics.newModel('boom2.glb')--, mushtex)
+    dblock = lovr.graphics.newModel('dirtblock.glb')
+    model2 = lovr.graphics.newModel('boom2.glb')
     --music = lovr.audio.newSource('untitled.ogg', 'static')
     --music:play()
 
     -- load textures
     texGrass = lovr.graphics.newMaterial(lovr.graphics.newTexture('tex/grass128.png', 1, 1, 1, 1))
     texStonewall = lovr.graphics.newMaterial(lovr.graphics.newTexture('tex/stonewall128.png', 1, 1, 1))
-    
+    groundblocktex = lovr.graphics.newTexture('groundblock.png')
+    mushbuv=lovr.graphics.newTexture('mushbuv.png')
     --lovr.graphics.setDepthTest('greater', true)
     lovr.graphics.setCullingEnabled(true)
 
@@ -187,13 +212,14 @@ function lovr.update(dT)
         end
     end
     
+    local lp = player 
+    
     -- INPUT
     GetInput(dT)
 
     -- Scale player position to match worldScale variable
     hx, hy, hz = lovr.headset.getPosition()
-    --hy = hy + hmdOffset.y
-    local lp = player 
+    --hy = hy + hmdOffset.y 
     lp.scaledPos = {
         x = lp.pos.x * worldScale + hx,
         y = lp.pos.y * worldScale + hy,
@@ -239,10 +265,11 @@ function lovr.update(dT)
 
     
     -- Create camera projection based on scaled world and headset offsets
+    local hof = (lp.actual_height - 170.0)/100.0
     camera = lovr.math.newMat4():lookAt(
-        vec3(lp.scaledPos.x, lp.scaledPos.y, lp.scaledPos.z),
+        vec3(lp.scaledPos.x, lp.scaledPos.y + hof, lp.scaledPos.z),
         vec3(lp.scaledPos.x + math.cos(lp.rot), 
-             lp.scaledPos.y, 
+             lp.scaledPos.y + hof + lp.yaw, 
              lp.scaledPos.z + math.sin(lp.rot)))
     lightcam = camera
     view = lovr.math.newMat4(camera):invert()
