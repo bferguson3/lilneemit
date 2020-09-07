@@ -213,7 +213,7 @@ function lovr.update(dT)
     end
     
     local lp = player 
-    
+     
     -- INPUT
     GetInput(dT)
 
