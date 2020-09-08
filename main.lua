@@ -53,7 +53,7 @@ lightPos = { 0.0, 0.0, 0.0 }
 adjLightPos = {} 
 sunDirection = { -0.25, -1.0, 0.0 }
 sunColor = { 0.0, 0.0, 0.0, 1.0 }
-worldAmbience = { 0.1, 0.1, 0.1, 1.0 }
+worldAmbience = { 0.05, 0.05, 0.05, 1.0 }
 minContrast = 0.005
 lovrVer = 0
 --deltaTime = 0
@@ -61,14 +61,19 @@ lovrVer = 0
 --Platform setup - stage test 
 platforms = { 
     [1] = {
-        pos = {x=3.0, y=0.0, z=0.0},
+        pos = {x=5.0, y=0.0, z=4.0},
         platform_ofs = 5.0,
-        platform_size = 3.5
+        platform_size = 5.0
     },
     [2] = {
-        pos = {x=-3.0, y=0.0, z=0.0},
+        pos = {x=-8.0, y=0.0, z=0.0},
         platform_ofs = 5.0,
-        platform_size = 3.5
+        platform_size = 5.0
+    },
+    [3] = {
+        pos = {x=-3.0, y=3.0, z=-12.0},
+        platform_ofs = 5.0,
+        platform_size = 5.0
     }
 }
 
@@ -261,9 +266,9 @@ function lovr.update(dT)
     
     -- LIGHTING
     -- quick animation
-    --worldLights.lights[1].position[1] = worldLights.lights[1].position[1] + 0.02
-    --worldLights.lights[2].position[1] = worldLights.lights[2].position[1] - 0.02
-    --worldLights.lights[3].position[2] = worldLights.lights[3].position[2] - 0.01
+    worldLights.lights[1].position[1] = 4*math.sin(totalFrames/120)
+    worldLights.lights[2].position[1] = 4*math.cos(totalFrames/120)
+    worldLights.lights[3].position[2] = 4*math.sin(totalFrames/120)
     
     lightBlob:send('sunDirection', sunDirection)
     lightBlob:send('pointLightCount', worldLights.getLightCount()) 

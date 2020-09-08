@@ -122,28 +122,76 @@ function GetInput(dT)
     if p.yaw > 2 then p.yaw = 2 end 
     
     -- * Collision * --  
-    if p.state == PLAYERSTATE.FALLING then -- CATCHME CODE
-        -- iterate through all platforms
-        -- platform object should have 'height offset' and 'platform size'
-        local pfpos, pfs = platforms[1].pos, platforms[1].platform_size/2 -- position and size of platform 
-        local x1, z1, x2, z2 = pfpos.x - pfs, pfpos.z - pfs, pfpos.x + pfs, pfpos.z + pfs -- rectangle of platform collider
-        local h = pfpos.y + platforms[1].platform_ofs  -- height of collider
-        if (p.pos.x > x1) and (p.pos.x < x2) and (p.pos.z > z1) and (p.pos.z < z2) and ((p.pos.y < (h+0.1))and((p.pos.y > (h-0.1)))) then
-            -- if the player 'feet' is within the collider height +/- 1dm
-            p.pos.y = pfpos.y + platforms[1].platform_ofs -- lock the player height
-            p.jumpTimer = 0 -- reset timer
-            p.state = PLAYERSTATE.NORMAL -- set player state
-        end
-    elseif p.state == PLAYERSTATE.NORMAL then -- FALLING CODE 
-        -- save a little effort by filter by player state, get vars as above
-        local pfpos, pfs = platforms[1].pos, platforms[1].platform_size/2 
-        local x1, z1, x2, z2 = pfpos.x - pfs, pfpos.z - pfs, pfpos.x + pfs, pfpos.z + pfs
-        local h = pfpos.y + platforms[1].platform_ofs  
-        if (p.pos.x < x1) or (p.pos.x > x2) or (p.pos.z < z1) or (p.pos.z > z2) then
-            -- if OUT of bounds of collider rect in any of the 4 directions
-            p.state = PLAYERSTATE.FALLING
-            p.jumpTimer = 0
-            p.fallBase = p.pos.y -- to determine fall acceleration
-        end
-    end
+    -------------------
+    -- wrap this whole bitch in a for
+    for i,plat in ipairs(platforms) do 
+        if p.state == PLAYERSTATE.FALLING then -- CATCHME CODE
+            -- iterate through all platforms
+            local type = 'circle'
+            if type == 'square' then 
+            -- platform object should have 'height offset' and 'platform size'
+                local pfpos, pfs = plat.pos, plat.platform_size/2 -- position and size of platform 
+                local x1, z1, x2, z2 = pfpos.x - pfs, pfpos.z - pfs, pfpos.x + pfs, pfpos.z + pfs -- rectangle of platform collider
+                local h = pfpos.y + plat.platform_ofs  -- height of collider
+                if (p.pos.x > x1) then 
+                    if (p.pos.x < x2) then 
+                        if (p.pos.z > z1) then 
+                            if (p.pos.z < z2) and ((p.pos.y < (h+0.1))and((p.pos.y > (h-0.1)))) then
+                                -- if the player 'feet' is within the collider height +/- 1dm
+                                p.pos.y = pfpos.y + plat.platform_ofs -- lock the player height
+                                p.jumpTimer = 0 -- reset timer
+                                p.state = PLAYERSTATE.NORMAL -- set player state
+                                break
+                            end
+                        end
+                    end
+                end
+            elseif type == 'circle' then 
+                local pfpos, pfr = plat.pos, plat.platform_size/2 -- radius is 1/2 diameter
+                -- pfpos is offset for collision check 
+                local cx = p.pos.x - pfpos.x
+                local cz = p.pos.z - pfpos.z -- cx, cz is distance from collider at 0,0
+                local cd = (cx^2 + cz^2) -- ignore sqrt
+                local cr = pfr^2 -- ignore sqrt 
+                local h = pfpos.y + plat.platform_ofs  -- height of collider
+                if (cd <= cr) and ((p.pos.y < (h+0.05))and((p.pos.y > (h-0.05)))) then 
+                    p.pos.y = pfpos.y + plat.platform_ofs -- lock the player height
+                    p.jumpTimer = 0 -- reset timer
+                    p.state = PLAYERSTATE.NORMAL -- set player state
+                    break
+                end
+            end 
+            -- end 'catchme'
+        elseif p.state == PLAYERSTATE.NORMAL then -- FALLING CODE 
+            -- save a little effort by filter by player state, get vars as above
+            local type = 'circle'
+            if type == 'square' then 
+                local pfpos, pfs = plat.pos, plat.platform_size/2 
+                local x1, z1, x2, z2 = pfpos.x - pfs, pfpos.z - pfs, pfpos.x + pfs, pfpos.z + pfs
+                local h = pfpos.y + plat.platform_ofs  
+                if (p.pos.x < x1) or (p.pos.x > x2) or (p.pos.z < z1) or (p.pos.z > z2) then
+                    -- if OUT of bounds of collider rect in any of the 4 directions
+                    p.state = PLAYERSTATE.FALLING
+                    p.jumpTimer = 0
+                    p.fallBase = p.pos.y -- to determine fall acceleration
+                    break
+                end
+            elseif type == 'circle' then 
+                local pfpos, pfr = plat.pos, plat.platform_size/2 -- radius is 1/2 diameter
+                -- pfpos is offset for collision check 
+                local cx = p.pos.x - pfpos.x
+                local cz = p.pos.z - pfpos.z -- cx, cz is distance from collider at 0,0
+                local cd = (cx^2 + cz^2) -- ignore sqrt
+                local cr = pfr^2 -- ignore sqrt 
+                local h = pfpos.y + plat.platform_ofs  -- height of collider
+                if cd > cr then 
+                    p.state = PLAYERSTATE.FALLING
+                    p.jumpTimer = 0
+                    p.fallBase = p.pos.y -- to determine fall acceleration
+                    break
+                end
+            end
+        end -- end 'falling'
+    end -- end platform for 
+    --print(p.state)
 end

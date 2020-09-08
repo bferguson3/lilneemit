@@ -31,11 +31,8 @@ renderScene = function ()
     lovr.graphics.setColor(1.0, 0.0, 1.0, 0.5)
     --wfShader:send('wf', wireframeTex)
     -- draw floor
-    
-
 -- DISABLE WIREFRAME
     --sDisableWireframe()
-    
     
     --specShader:send('metallic', 32)
     --specShader:send('specularStrength', 5.0)
@@ -43,26 +40,13 @@ renderScene = function ()
     
     lovr.graphics.setColor(1, 1, 1, 1)
     shader:send('useEmissive', 1)
+
+    for i,p in ipairs(platforms) do 
+        model:draw(p.pos.x, p.pos.y, p.pos.z)
+        dblock:draw(p.pos.x, p.pos.y-1.5, p.pos.z, 1.5)
+    end
     
-    model:draw(3, 0, 0, 1)
-    model:draw(-3, 0, 0, 1)
-    model:draw(5, 2, -2, 1)
-    model:draw(0, 1, -4, 1)
-    
-    dblock:draw(3, -1.5, 0, 1.5)
-    dblock:draw(5, -1.5, 0, 1.5)
-    dblock:draw(7, -1.5, 0, 1.5)
-    model:draw(5, 2, -2, 1)
-    dblock:draw(1, -1.5, 0, 1.5)
-    
-    
-    --lovr.graphics.newModel('mushboom.glb'):draw(-3, 0, 0)
-    --lovr.graphics.newModel('mushboom.glb'):draw(-6, 0, 0)
-    
-    --dblock:draw(-3, -1.5, 0, 1.5)
-    
-    
-    --shader:send('useEmissive', 0)
+    shader:send('useEmissive', 0)
     
     -- UNLIT SHADER
     lovr.graphics.setShader() -- Reset to default/unlit
@@ -72,15 +56,8 @@ renderScene = function ()
 
     -- light sims
     lovr.graphics.setColor(1, 1, 1, 1)
-    lovr.graphics.print('hello world', 0, 2, -3, .5)
+    --lovr.graphics.print('hello world', 0, 2, -3, .5)
 
-          
-    --EnableWireframe()
-    --lovr.graphics.setColor(0.5, 1, 0.5, 0.05)
-    --wfShader:send('wf', wireframeTex2)
-    --model:draw(-1, 3.3, -4.1, 3)
-    --DisableWireframe()
-    
 
     -- reset color/shader variables
     --specShader:send('metallic', 32)
