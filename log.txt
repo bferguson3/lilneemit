@@ -1,1 +1,4 @@
-adb: error: failed to get feature set: no devices/emulators found
+    Vendor: Intel (0x8086)
+    Device: Mesa Intel(R) UHD Graphics 600 (GLK 2) (0x3185)
+OpenGL vendor string: Intel
+OpenGL renderer string: Mesa Intel(R) UHD Graphics 600 (GLK 2)

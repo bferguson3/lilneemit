@@ -10,6 +10,7 @@ include 'src/renderScene.lua'
 
 -- VERSION OPTIONS -- 
 DESKTOP = 1 -- set to 0 for HMD based input
+INTEL = false 
 
 -- Globals
 fRenderDelta = 0.0
@@ -76,16 +77,26 @@ function lovr.load()
     print(_VERSION)
     local a, b
     a, lovrVer, b = lovr.getVersion()
-    lovrVer = 14
+    --lovrVer = 14
     print(string.format("LOVR version: %d.%d.%d", a, lovrVer, b))
+    if b == 1 then print('Intel GPU patch applied.') end
     -- print os info
     sOperatingSystem = lovr.getOS()
     print('OS detected: ' .. sOperatingSystem)
     if sOperatingSystem ~= 'Android' then 
+        if sOperatingSystem == 'Linux' and b ~= 1 then 
+            os.execute('glxinfo | grep \'Intel\' > log.txt')
+            local f = lovr.filesystem.read('log.txt')
+            if string.find(f, 'Intel') then 
+                lovr.errhand('Intel GPU detected! Please quit and download the patch!')
+                INTEL = true 
+            end
+        end
         lovr.keyboard = require('src/lovr-keyboard')
         lovr.mouse = require('src/lovr-mouse')
         -- set up logfile
         myDebug.init()
+        
     end
     -- Important note: 
     -- Custom builds of LOVR for Tangram (that fix keyboard input) need to have LOVR_VERSION_MINOR

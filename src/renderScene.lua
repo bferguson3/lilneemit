@@ -13,6 +13,13 @@ function DisableWireframe()
 end
 
 renderScene = function ()
+
+    if INTEL then 
+        lovr.graphics.clear()
+        lovr.graphics.reset()
+        lovr.graphics.print('Intel GPU detected!\nQuit and download the patch:\n\nhttp://itch.io/tekkamansoul', 0, 0, -6)
+        return 
+    end
     
     shader:send('liteTransform', lightcam)
     --specShader:send('liteTransform', camera) 
