@@ -77,12 +77,54 @@ function GetInput(dT)
                         p.pos.z = p.pos.z + playerWalkSpd*(dT)*(math.sin(p.rot+(math.pi/2)))
                     end
                 end 
-                if player.state == PLAYERSTATE.NORMAL then 
+                if not EDITMODE then 
+                    if player.state == PLAYERSTATE.NORMAL then 
+                        if lovr.keyboard.isDown('space') and player.jumpReleased then 
+                            player.jumpReleased = false
+                            player.jumpBase = p.pos.y
+                            player.state = PLAYERSTATE.JUMPING
+                        end
+                    end -- PLAYERSTATE.NORMAL
+                else 
+            --editmode? 
                     if lovr.keyboard.isDown('space') then 
-                        player.jumpBase = p.pos.y
-                        player.state = PLAYERSTATE.JUMPING
+                        p.pos.y = p.pos.y + (dT * playerWalkSpd) 
                     end
-                end -- PLAYERSTATE.NORMAL
+                    if lovr.keyboard.isDown('lctrl') then 
+                        p.pos.y = p.pos.y - (dT * playerWalkSpd)
+                    end
+                    if lovr.keyboard.isDown('backspace') then 
+                        if not player.erasePressed then 
+                            table.remove(level.gems)
+                            player.erasePressed = true 
+                        end
+                    else -- backspace released
+                        player.erasePressed = false 
+                    end
+                    if lovr.keyboard.isDown('g') then 
+                        player.gemPressed = true 
+                    else -- 'g' released
+                        if player.gemPressed then 
+                            --print('gem pos: ', p.pos.x, p.pos.y, p.pos.z)
+                            table.insert(level.gems, { x=round(p.pos.x,1), y=round(p.pos.y,1)+2, z=round(p.pos.z,1) })
+                            player.gemPressed = false 
+                        end
+                    end
+                end
+            -- end edit mode                
+                -- release space bool
+                if not lovr.keyboard.isDown('space') then 
+                    player.jumpReleased = true 
+                end
+                if not EDITMODE then 
+                    if lovr.keyboard.isDown('tab') then 
+                        EDITMODE = true 
+                    end 
+                else
+                    if lovr.keyboard.isDown('escape') then 
+                        EDITMODE = false 
+                    end
+                end
             end -- END KEYBOARD
         end
     end -- end desktop
@@ -91,26 +133,28 @@ function GetInput(dT)
     if DESKTOP == 0 then  
         if lovr.headset.isDown('right', 'touchpad') then
             local tpx, tpy = lovr.headset.getAxis('right', 'touchpad')
-            if tpy < -0.5 then 
-                p.pos.x = p.pos.x + playerWalkSpd*(dT)*(math.cos(-p.facing))
-                p.pos.z = p.pos.z + playerWalkSpd*(dT)*(math.sin(-p.facing))
-            elseif tpy > 0.5 then 
+            if tpy > 0.5 then 
                 p.pos.x = p.pos.x - playerWalkSpd*(dT)*(math.cos(-p.facing))
                 p.pos.z = p.pos.z - playerWalkSpd*(dT)*(math.sin(-p.facing))    
-            end
-            if tpx > 0.5 then 
+            elseif tpx > 0.5 then 
                 p.pos.x = p.pos.x + playerWalkSpd*(dT)*(math.cos(-p.facing+(math.pi/2)))
                 p.pos.z = p.pos.z + playerWalkSpd*(dT)*(math.sin(-p.facing+(math.pi/2)))
             elseif tpx < -0.5 then 
                 p.pos.x = p.pos.x + playerWalkSpd*(dT)*(math.cos(-p.facing-(math.pi/2)))
                 p.pos.z = p.pos.z + playerWalkSpd*(dT)*(math.sin(-p.facing-(math.pi/2)))
+            else 
+                p.pos.x = p.pos.x + playerWalkSpd*(dT)*(math.cos(-p.facing))
+                p.pos.z = p.pos.z + playerWalkSpd*(dT)*(math.sin(-p.facing))
             end
         end 
-        if lovr.headset.isDown('right', 'trigger') then
+        if lovr.headset.isDown('right', 'trigger') and player.jumpReleased then
+            player.jumpReleased = false
             if player.state == PLAYERSTATE.NORMAL then 
                 player.jumpBase = p.pos.y
                 player.state = PLAYERSTATE.JUMPING
             end -- PLAYERSTATE.NORMAL
+        else 
+            player.jumpReleased = true
         end
     end -- end vr mode input
     
@@ -124,7 +168,7 @@ function GetInput(dT)
     -- * Collision * --  
     -------------------
     -- wrap this whole bitch in a for
-    for i,plat in ipairs(platforms) do 
+    for i,plat in ipairs(level.platforms) do 
         if p.state == PLAYERSTATE.FALLING then -- CATCHME CODE
             -- iterate through all platforms
             local type = 'circle'
@@ -154,7 +198,7 @@ function GetInput(dT)
                 local cd = (cx^2 + cz^2) -- ignore sqrt
                 local cr = pfr^2 -- ignore sqrt 
                 local h = pfpos.y + plat.platform_ofs  -- height of collider
-                if (cd <= cr) and ((p.pos.y < (h+0.05))and((p.pos.y > (h-0.05)))) then 
+                if (cd <= cr) and ((p.pos.y < (h+0.1))and((p.pos.y > (h-0.1)))) then 
                     p.pos.y = pfpos.y + plat.platform_ofs -- lock the player height
                     p.jumpTimer = 0 -- reset timer
                     p.state = PLAYERSTATE.NORMAL -- set player state

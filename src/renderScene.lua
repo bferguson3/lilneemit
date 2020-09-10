@@ -37,17 +37,23 @@ renderScene = function ()
     --specShader:send('metallic', 32)
     --specShader:send('specularStrength', 5.0)
     
-    
+    -- * DRAW ALL PLATFORMS * --
     lovr.graphics.setColor(1, 1, 1, 1)
     shader:send('useEmissive', 1)
 
-    for i,p in ipairs(platforms) do 
+    for i,p in ipairs(level.platforms) do 
         model:draw(p.pos.x, p.pos.y, p.pos.z)
         dblock:draw(p.pos.x, p.pos.y-1.5, p.pos.z, 1.5)
     end
     
     shader:send('useEmissive', 0)
     
+    -- * DRAW GEMS * --
+    lovr.graphics.setShader(gemShader)
+    for i,g in ipairs(level.gems) do 
+        gem:draw(g.x, g.y, g.z, 1, totalFrames/100 + i)
+    end
+
     -- UNLIT SHADER
     lovr.graphics.setShader() -- Reset to default/unlit
     worldLights.drawPointLights()

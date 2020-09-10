@@ -11,6 +11,7 @@ include 'src/renderScene.lua'
 -- VERSION OPTIONS -- 
 DESKTOP = 1 -- set to 0 for HMD based input
 INTEL = false 
+EDITMODE = true
 
 -- Globals
 fRenderDelta = 0.0
@@ -38,7 +39,9 @@ player = {
     fallBase = 0.0,
     hmd_orient = {},
     actual_height = 170,
-    yaw = 0.0
+    yaw = 0.0,
+    jumpReleased = true,
+    gemPressed = false
 }
 if DESKTOP == 1 then player.actual_height = 220 end 
 playerYf = 0.0
@@ -59,23 +62,11 @@ lovrVer = 0
 --deltaTime = 0
 
 --Platform setup - stage test 
-platforms = { 
-    [1] = {
-        pos = {x=5.0, y=0.0, z=4.0},
-        platform_ofs = 5.0,
-        platform_size = 5.0
-    },
-    [2] = {
-        pos = {x=-8.0, y=0.0, z=0.0},
-        platform_ofs = 5.0,
-        platform_size = 5.0
-    },
-    [3] = {
-        pos = {x=-3.0, y=3.0, z=-12.0},
-        platform_ofs = 5.0,
-        platform_size = 5.0
-    }
-}
+--platforms = { 
+    
+--}
+
+include 'lv1.lua'
 
 function lovr.load()
 
@@ -122,6 +113,7 @@ function lovr.load()
     local defaultVertex = lovr.filesystem.read('src/default.vs')
     local defaultFragment = lovr.filesystem.read('src/default.fs')
     local specularFragment = lovr.filesystem.read('src/default-specular.fs')
+    local gemFrag = lovr.filesystem.read('src/gemshader.fs')
     --local wireframeFrag = lovr.filesystem.read('src/wireframe.fs')
     
     -- Init light blob 
@@ -154,6 +146,13 @@ function lovr.load()
     specShader = lovr.graphics.newShader(
         lightBlob:getShaderCode('lightBlob') .. defaultVertex,
         lightBlob:getShaderCode('lightBlob') .. defaultFragment, 
+        { flags = {
+            uniformScale = true
+        }}
+    )
+    gemShader = lovr.graphics.newShader(
+        lightBlob:getShaderCode('lightBlob') .. defaultVertex,
+        lightBlob:getShaderCode('lightBlob') .. gemFrag, 
         { flags = {
             uniformScale = true
         }}
@@ -191,6 +190,7 @@ function lovr.load()
     model = lovr.graphics.newModel('boom2.glb')--, mushtex)
     dblock = lovr.graphics.newModel('dirtblock.glb')
     model2 = lovr.graphics.newModel('boom2.glb')
+    gem = lovr.graphics.newModel('gem.glb')
     --music = lovr.audio.newSource('untitled.ogg', 'static')
     --music:play()
 
@@ -216,6 +216,7 @@ function lovr.update(dT)
     --deltaTime = dT 
     fRenderDelta = os.clock()
     totalFrames = totalFrames + 1
+    if totalFrames > 1e7 then totalFrames = 0 end 
     local fr 
     
     if sOperatingSystem ~= 'Android' then 
@@ -229,9 +230,11 @@ function lovr.update(dT)
     end
     
     local lp = player 
-     
+    
+    
     -- INPUT
     GetInput(dT)
+    if EDITMODE then lp.state = PLAYERSTATE.NORMAL end
 
     -- Scale player position to match worldScale variable
     hx, hy, hz = lovr.headset.getPosition()
@@ -256,7 +259,10 @@ function lovr.update(dT)
         end
     elseif lp.state == PLAYERSTATE.FALLING then 
         lp.jumpTimer = lp.jumpTimer + dT 
-        lp.pos.y = lp.fallBase - (lp.jumpTimer * lp.jumpTimer * GRAVITY) 
+        --lp.pos.y = lp.fallBase - (lp.jumpTimer * lp.jumpTimer * GRAVITY)
+        local dy = playerYf - (lp.fallBase - (lp.jumpTimer * lp.jumpTimer * GRAVITY))
+        if dy >= 0.20 then dy = 0.19 end
+        lp.pos.y = lp.pos.y - dy 
         if lp.pos.y < 0 then 
             lp.pos.y = 0  
             lp.jumpTimer = 0
@@ -322,7 +328,14 @@ function lovr.quit()
         if myDebug.logFPS then 
             myDebug.print('Average FPS: ' .. round(fFPSAvg/totalFrames, 2))
         end
-    end    
+    end
+    print('** Gem Output **')
+    local out = '{ gems = {\n'
+    for i,g in ipairs(level.gems) do 
+        out = out .. '[' .. i .. '] = { x=' .. g.x .. ',y=' .. g.y .. ',z=' .. g.z .. ' },\n'
+    end
+    out = out .. '} }'
+    print(out)
     print('OK.')
 end
 
