@@ -59,8 +59,8 @@ sunColor = { 0.0, 0.0, 0.0, 1.0 }
 worldAmbience = { 0.05, 0.05, 0.05, 1.0 }
 minContrast = 0.005
 lovrVer = 0
---deltaTime = 0
-
+deltaTime = 0
+gameTime = 0 
 --Platform setup - stage test 
 --platforms = { 
     
@@ -199,6 +199,9 @@ function lovr.load()
     texStonewall = lovr.graphics.newMaterial(lovr.graphics.newTexture('tex/stonewall128.png', 1, 1, 1))
     groundblocktex = lovr.graphics.newTexture('groundblock.png')
     mushbuv=lovr.graphics.newTexture('mushbuv.png')
+    water = lovr.graphics.newMaterial(lovr.graphics.newTexture('watera.png'))
+    waterfoam = lovr.graphics.newMaterial(lovr.graphics.newTexture('waterb.png'))
+    waterc = lovr.graphics.newMaterial(lovr.graphics.newTexture('waterc.png'))
     --lovr.graphics.setDepthTest('greater', true)
     lovr.graphics.setCullingEnabled(true)
 
@@ -213,7 +216,8 @@ end
 
 function lovr.update(dT)
     -- Per-frame ticks
-    --deltaTime = dT 
+    deltaTime = dT 
+    gameTime = gameTime + dT
     fRenderDelta = os.clock()
     totalFrames = totalFrames + 1
     if totalFrames > 1e7 then totalFrames = 0 end 
@@ -230,7 +234,7 @@ function lovr.update(dT)
     end
     
     local lp = player 
-    
+   
     
     -- INPUT
     GetInput(dT)
@@ -296,6 +300,14 @@ function lovr.update(dT)
     lightcam = camera
     view = lovr.math.newMat4(camera):invert()
     
+    if (SCENE > 0) then
+        if (lp.scaledPos.y+hof < (gameTime/3)-1.0) then 
+            SCENE = -1
+            gameTime = 0
+            lp.pos.x = 0; lp.pos.y = 0; lp.pos.z = 0
+        end
+    end  
+
     --specShader:send('specularStrength', 0.5)
     --specShader:send('metallic', 32.0)
 
@@ -312,12 +324,29 @@ function lovr.update(dT)
     end
 end
 
-
+SCENE = 0
+sin = math.sin
 
 function lovr.draw()
     lovr.graphics.clear(worldAmbience)
     lovr.graphics.transform(view)
-    renderScene()
+    
+    if SCENE == 1 then 
+        renderScene(deltaTime)
+    elseif SCENE == 0 then 
+        renderTitle()
+    elseif SCENE == -1 then 
+        lovr.graphics.clear(gameTime, gameTime, gameTime, 1.0)
+        if gameTime > 1 then 
+            lovr.graphics.clear(sin(gameTime), sin(gameTime), sin(gameTime), 1.0)
+            renderTitle()
+        end
+        if gameTime > 3 then 
+            gameTime = 0 
+            SCENE = 0
+        end
+    end
+    
     lovr.graphics.reset()
 end
 

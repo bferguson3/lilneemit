@@ -28,7 +28,7 @@ function GetInput(dT)
     if an ~= 0.0 then -- If not desktop mode  
         p.facing = an * ay -- set HMD facing to the Y component in radians 
     end    
-    
+
     -- * DESKTOP mode input * -- 
     if DESKTOP == 1 then 
         if lovrVer <= 13 then 
@@ -83,6 +83,13 @@ function GetInput(dT)
                             player.jumpReleased = false
                             player.jumpBase = p.pos.y
                             player.state = PLAYERSTATE.JUMPING
+                            -- start
+                            if SCENE == 0 then 
+                                p.pos.x = 5; player.jumpBase = 5; p.pos.y = 6; p.pos.z = 2.5
+                                player.state = PLAYERSTATE.FALLING
+                                SCENE = 1
+                                gameTime = 0
+                            end
                         end
                     end -- PLAYERSTATE.NORMAL
                 else 
@@ -152,6 +159,13 @@ function GetInput(dT)
             if player.state == PLAYERSTATE.NORMAL then 
                 player.jumpBase = p.pos.y
                 player.state = PLAYERSTATE.JUMPING
+                -- start
+                if SCENE == 0 then 
+                    p.pos.x = 5; player.jumpBase = 5; p.pos.y = 6; p.pos.z = 2.5
+                    player.state = PLAYERSTATE.FALLING
+                    SCENE = 1
+                    gameTime = 0
+                end
             end -- PLAYERSTATE.NORMAL
         else 
             player.jumpReleased = true
@@ -198,7 +212,7 @@ function GetInput(dT)
                 local cd = (cx^2 + cz^2) -- ignore sqrt
                 local cr = pfr^2 -- ignore sqrt 
                 local h = pfpos.y + plat.platform_ofs  -- height of collider
-                if (cd <= cr) and ((p.pos.y < (h+0.1))and((p.pos.y > (h-0.1)))) then 
+                if (cd <= cr) and ((p.pos.y < (h+0.1))and((p.pos.y > (h-0.2)))) then 
                     p.pos.y = pfpos.y + plat.platform_ofs -- lock the player height
                     p.jumpTimer = 0 -- reset timer
                     p.state = PLAYERSTATE.NORMAL -- set player state

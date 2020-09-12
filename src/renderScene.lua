@@ -12,7 +12,22 @@ function DisableWireframe()
     lovr.graphics.setShader(oldsh)
 end
 
-renderScene = function ()
+local lg = lovr.graphics
+local pcol = EGA[16]
+
+renderTitle = function () 
+    if totalFrames % 20 == 0 then 
+        pcol = EGA[math.random(1, 16)] end
+    lg.setColor(pcol)
+    lg.print('Lil Neemit!', 0, 4, -7, 2)
+    lg.setColor(EGA[16])
+    lg.print('Desktop Controls:\nWASD) Move\tSpace) Jump\nMouse) Look', -3, 2, -7.1, 0.5)
+    lg.print('VR Controls:\nPad) Move\tTrigger) Jump\nTurn with your body', 3, 2, -7.1, 0.5)
+    lg.print('"JUMP" to start!', 0, 0, -6.9, 0.5)
+
+end
+
+renderScene = function (deltaTime)
 
     if INTEL then 
         lovr.graphics.clear()
@@ -25,18 +40,6 @@ renderScene = function ()
     --specShader:send('liteTransform', camera) 
     lovr.graphics.setShader(shader)
     
--- ENABLE WIREFRAME
-    local cm, wm, oldsh 
-    --EnableWireframe()
-    lovr.graphics.setColor(1.0, 0.0, 1.0, 0.5)
-    --wfShader:send('wf', wireframeTex)
-    -- draw floor
--- DISABLE WIREFRAME
-    --sDisableWireframe()
-    
-    --specShader:send('metallic', 32)
-    --specShader:send('specularStrength', 5.0)
-    
     -- * DRAW ALL PLATFORMS * --
     lovr.graphics.setColor(1, 1, 1, 1)
     shader:send('useEmissive', 1)
@@ -47,15 +50,24 @@ renderScene = function ()
     end
     
     shader:send('useEmissive', 0)
-    
+    -- WATER
+    for wx = -50, 50, 5 do 
+        for wy = -50, 50, 5 do 
+            lovr.graphics.plane(waterc, wx + (totalFrames%480)/48, (gameTime/3)-1.0, wy, 5, 5, math.pi/2, 1, 0, 0)
+            --lovr.graphics.plane(waterfoam, wx, 0.5, wy, 5, 5, math.pi/2, 1, 0, 0)
+        end
+    end
+
     -- * DRAW GEMS * --
     lovr.graphics.setShader(gemShader)
     for i,g in ipairs(level.gems) do 
         gem:draw(g.x, g.y, g.z, 1, totalFrames/100 + i)
     end
-
+    
     -- UNLIT SHADER
     lovr.graphics.setShader() -- Reset to default/unlit
+    
+    
     worldLights.drawPointLights()
     -- skybox
     -- todo
@@ -63,12 +75,7 @@ renderScene = function ()
     -- light sims
     lovr.graphics.setColor(1, 1, 1, 1)
     --lovr.graphics.print('hello world', 0, 2, -3, .5)
-
-
-    -- reset color/shader variables
-    --specShader:send('metallic', 32)
-    --specShader:send('specularStrength', 0.5)
-    
+ 
     if sOperatingSystem ~= 'Android' then 
         if myDebug.showFrameDelta then 
             fRenderDelta = os.clock() - fRenderDelta 
