@@ -11,7 +11,7 @@ include 'src/renderScene.lua'
 -- VERSION OPTIONS -- 
 DESKTOP = 1 -- set to 0 for HMD based input
 INTEL = false 
-EDITMODE = true
+EDITMODE = false
 
 -- Globals
 fRenderDelta = 0.0
@@ -202,6 +202,13 @@ function lovr.load()
     water = lovr.graphics.newMaterial(lovr.graphics.newTexture('watera.png'))
     waterfoam = lovr.graphics.newMaterial(lovr.graphics.newTexture('waterb.png'))
     waterc = lovr.graphics.newMaterial(lovr.graphics.newTexture('waterc.png'))
+
+    -- sfx
+    sfxDeath = lovr.audio.newSource('die.ogg', 'static')
+    sfxGem = lovr.audio.newSource('gem.ogg', 'static')
+    sfxLvlbeat = lovr.audio.newSource('lvlbeat.ogg', 'static')
+    
+
     --lovr.graphics.setDepthTest('greater', true)
     lovr.graphics.setCullingEnabled(true)
 
@@ -305,11 +312,14 @@ function lovr.update(dT)
             SCENE = -1
             gameTime = 0
             lp.pos.x = 0; lp.pos.y = 0; lp.pos.z = 0
+            sfxDeath:play()
         end
     end  
 
     --specShader:send('specularStrength', 0.5)
     --specShader:send('metallic', 32.0)
+
+    
 
     -- Adjust head position (for specular)
     if lovr.headset then 
