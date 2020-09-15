@@ -8,7 +8,7 @@ function GetInput(dT)
     local playerRotSpd = 2
     local playerWalkSpd = 5
     
-    if lovr.mouse then 
+    if lovr.mouse and (SCENE > 0) then 
         local mx, my = lovr.mouse.getPosition()
         local deltax, deltay = (mx-pmx), (my-pmy)
         pmx, pmy = mx, my 
@@ -85,10 +85,11 @@ function GetInput(dT)
                             player.state = PLAYERSTATE.JUMPING
                             -- start
                             if SCENE == 0 then 
-                                p.pos.x = 5; player.jumpBase = 5; p.pos.y = 6; p.pos.z = 2.5
-                                player.state = PLAYERSTATE.FALLING
+                                p.pos.x = 5; player.jumpBase = 5; p.pos.y = 6; p.pos.z = 4
                                 SCENE = 1
+                                player.state = PLAYERSTATE.FALLING
                                 gameTime = 0
+                                include 'lv1.lua'
                             end
                         end
                     end -- PLAYERSTATE.NORMAL
@@ -115,6 +116,17 @@ function GetInput(dT)
                             --print('gem pos: ', p.pos.x, p.pos.y, p.pos.z)
                             table.insert(level.gems, { x=round(p.pos.x,1), y=round(p.pos.y,1)+2, z=round(p.pos.z,1) })
                             player.gemPressed = false 
+                        end
+                    end
+                    if lovr.keyboard.isDown('t') then 
+                        player.tPressed = true 
+                    else
+                        if player.tPressed then 
+                            table.insert(level.platforms, {
+                                pos = { x=p.pos.x, y=p.pos.y-5, z=p.pos.z },
+                                platform_ofs = 5, platform_size = 5
+                            })
+                            player.tPressed = false
                         end
                     end
                 end
@@ -161,10 +173,11 @@ function GetInput(dT)
                 player.state = PLAYERSTATE.JUMPING
                 -- start
                 if SCENE == 0 then 
-                    p.pos.x = 5; player.jumpBase = 5; p.pos.y = 6; p.pos.z = 2.5
+                    p.pos.x = 5; player.jumpBase = 5; p.pos.y = 6; p.pos.z = 4
                     player.state = PLAYERSTATE.FALLING
                     SCENE = 1
                     gameTime = 0
+                    include 'lv1.lua'
                 end
             end -- PLAYERSTATE.NORMAL
         else 

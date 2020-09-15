@@ -31,7 +31,7 @@ player = {
     pos = { x = 0.0, y = 0.0, z = 0.0 },
     scaledPos = {},
     rot = 0.0,
-    facing = 0.0,
+    facing = math.pi,
     state = PLAYERSTATE['NORMAL'],
     jumpTimer = 0.0,
     jumpHeight = 10.0,
@@ -39,7 +39,7 @@ player = {
     fallBase = 0.0,
     hmd_orient = {},
     actual_height = 170,
-    yaw = 0.0,
+    yaw = 2,
     jumpReleased = true,
     gemPressed = false
 }
@@ -49,7 +49,7 @@ playerYDelta = 0.0
 player.pos = { x = 0.0, y = 0.0, z = 0.0 }
 player.scaledPos = {}
 --hmdOffset = { x = 0, y = -1.0, z = 0 }
-player.rot = 0.0
+player.rot = math.pi*(1/2)
 worldScale = 1.0
 local lightBlob = nil
 lightPos = { 0.0, 0.0, 0.0 }
@@ -316,11 +316,25 @@ function lovr.update(dT)
         end
     end  
 
+    -- Check gem collision
+    for i,g in ipairs(level.gems) do
+        local x1, x2 = g.x-1, g.x+1
+        local y1, y2 = g.y-1, g.y+1
+        local z1, z2 = g.z-1, g.z+1 
+        if not g.got then 
+            if lp.pos.x >= x1 and lp.pos.x <= x2 then 
+                if lp.pos.y+1.7 >= y1 and lp.pos.y+1.7 <= y2 then 
+                    if lp.pos.z >= z1 and lp.pos.z <= z2 then 
+                        g.got = true
+                        sfxGem:play()
+                    end
+                end
+            end
+        end
+    end
+
     --specShader:send('specularStrength', 0.5)
     --specShader:send('metallic', 32.0)
-
-    
-
     -- Adjust head position (for specular)
     if lovr.headset then 
         hx, hy, hz = lovr.headset.getPosition()
@@ -368,12 +382,19 @@ function lovr.quit()
             myDebug.print('Average FPS: ' .. round(fFPSAvg/totalFrames, 2))
         end
     end
-    print('** Gem Output **')
+    print('--** Gem Output **')
     local out = '{ gems = {\n'
     for i,g in ipairs(level.gems) do 
         out = out .. '[' .. i .. '] = { x=' .. g.x .. ',y=' .. g.y .. ',z=' .. g.z .. ' },\n'
     end
-    out = out .. '} }'
+    out = out .. '},\n'
+    print(out)
+    print('--** Mushes Output **')
+    out = 'platforms = { \n'
+    for i,g in ipairs(level.platforms) do 
+        out = out .. '[' .. i .. '] = {\npos={x=' .. g.pos.x .. ',y=' .. g.pos.y .. ',z=' .. g.pos.z .. '},\n' .. 'platform_ofs=' .. g.platform_ofs .. ',\nplatform_size='..g.platform_size..',\n},\n'
+    end
+    out = out .. '}\n}'
     print(out)
     print('OK.')
 end

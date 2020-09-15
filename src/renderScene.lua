@@ -16,6 +16,8 @@ local lg = lovr.graphics
 local pcol = EGA[16]
 
 renderTitle = function () 
+    player.rot = -1.55
+    player.yaw = 0
     if totalFrames % 20 == 0 then 
         pcol = EGA[math.random(1, 16)] end
     lg.setColor(pcol)
@@ -61,7 +63,8 @@ renderScene = function (deltaTime)
     -- * DRAW GEMS * --
     lovr.graphics.setShader(gemShader)
     for i,g in ipairs(level.gems) do 
-        gem:draw(g.x, g.y, g.z, 1, totalFrames/100 + i)
+        if not g.got then 
+            gem:draw(g.x, g.y, g.z, 1, totalFrames/100 + i) end
     end
     
     -- UNLIT SHADER
