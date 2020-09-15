@@ -9,7 +9,7 @@ include 'src/getInput.lua'
 include 'src/renderScene.lua'
 
 -- VERSION OPTIONS -- 
-DESKTOP = 0 -- set to 0 for HMD based input
+DESKTOP = 1 -- set to 0 for HMD based input
 INTEL = false 
 EDITMODE = false
 
@@ -157,7 +157,7 @@ function lovr.load()
             uniformScale = true
         }}
     )
- 
+    lovr.headset.setClipDistance(0.1, 100)
  -- Red light -- not as harsh, long range low poer
     worldLights.createWorldLight(
         { -3.0, 1.0, -3.0 }, -- position
@@ -354,7 +354,20 @@ function lovr.update(dT)
         print('WARNING - Headset driver failed to load')
         --specShader:send('viewPos', { player.pos.x, player.pos.y, player.pos.z })
     end
-    
+    local done = true
+    for i,g in ipairs(level.gems) do
+        if g.got ~= true then 
+            done = false
+        end
+    end
+    if done == true then 
+        sfxLvlbeat:play()
+        SCENE = -1
+        include 'lv1.lua'
+        gameTime = 0
+        lp.pos.x = 0; lp.pos.y = 0; lp.pos.z = 0
+        done = false
+    end
 end
 
 SCENE = 0

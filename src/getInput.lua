@@ -80,10 +80,12 @@ function GetInput(dT)
                 if not EDITMODE then 
                     if player.state == PLAYERSTATE.NORMAL then 
                         if lovr.keyboard.isDown('space') and player.jumpReleased then 
-                            player.jumpReleased = false
-                            player.jumpBase = p.pos.y
-                            player.state = PLAYERSTATE.JUMPING
-                            -- start
+                            if SCENE ~= -1 then 
+                                player.jumpReleased = false
+                                player.jumpBase = p.pos.y
+                                player.state = PLAYERSTATE.JUMPING
+                            end
+                                -- start
                             if SCENE == 0 then 
                                 p.pos.x = 5; player.jumpBase = 5; p.pos.y = 6; p.pos.z = 4
                                 SCENE = 1
@@ -125,7 +127,7 @@ function GetInput(dT)
                     else
                         if player.tPressed then 
                             table.insert(level.platforms, {
-                                pos = { x=p.pos.x, y=p.pos.y-5, z=p.pos.z },
+                                pos = { x=round(p.pos.x,1), y=round(p.pos.y-5,1), z=round(p.pos.z,1) },
                                 platform_ofs = 5, platform_size = 5
                             })
                             player.tPressed = false
@@ -153,11 +155,29 @@ function GetInput(dT)
     -- ** VR Mode input **
     if DESKTOP == 0 then  
         hands = lovr.headset.getHands()
-        for i,h in ipairs(hands) do 
-            print(h)
+        if lovr.headset.isDown('right', 'trigger') then
+            if player.jumpReleased == true then
+                player.jumpReleased = false
+                if player.state == PLAYERSTATE.NORMAL then 
+                    player.jumpBase = p.pos.y
+                    player.state = PLAYERSTATE.JUMPING
+                    -- start
+                    if SCENE == 0 then 
+                        p.pos.x = 5; player.jumpBase = 5; p.pos.y = 6; p.pos.z = 4
+                        player.state = PLAYERSTATE.FALLING
+                        SCENE = 1
+                        gameTime = 0
+                        include 'lv1.lua'
+                    end
+                end -- PLAYERSTATE.NORMAL
+            end
+        else 
+            player.jumpReleased = true
         end
         if lovr.headset.isDown('right', 'touchpad') then
             local tpx, tpy = lovr.headset.getAxis('right', 'touchpad')
+            --print(tpx, tpy)
+            --[[
             if tpy > 0.5 then 
                 p.pos.x = p.pos.x - playerWalkSpd*(dT)*(math.cos(-p.facing))
                 p.pos.z = p.pos.z - playerWalkSpd*(dT)*(math.sin(-p.facing))    
@@ -167,28 +187,19 @@ function GetInput(dT)
             elseif tpx < -0.5 then 
                 p.pos.x = p.pos.x + playerWalkSpd*(dT)*(math.cos(-p.facing-(math.pi/2)))
                 p.pos.z = p.pos.z + playerWalkSpd*(dT)*(math.sin(-p.facing-(math.pi/2)))
-            else 
-                p.pos.x = p.pos.x + playerWalkSpd*(dT)*(math.cos(-p.facing))
-                p.pos.z = p.pos.z + playerWalkSpd*(dT)*(math.sin(-p.facing))
+            ]]
+            if tpy <= 0.6 then
+                --forward
+                p.pos.x = p.pos.x + playerWalkSpd*(dT)*(math.cos(-p.facing-(math.pi/2)))
+                p.pos.z = p.pos.z + playerWalkSpd*(dT)*(math.sin(-p.facing-(math.pi/2)))
+            elseif tpy > 0.6 then
+                --back 
+                    p.pos.x = p.pos.x + playerWalkSpd*(dT)*(math.cos(-p.facing+(math.pi/2)))
+                    p.pos.z = p.pos.z + playerWalkSpd*(dT)*(math.sin(-p.facing+(math.pi/2)))
             end
+            
         end 
-        if lovr.headset.isDown('right', 'trigger') and player.jumpReleased then
-            player.jumpReleased = false
-            if player.state == PLAYERSTATE.NORMAL then 
-                player.jumpBase = p.pos.y
-                player.state = PLAYERSTATE.JUMPING
-                -- start
-                if SCENE == 0 then 
-                    p.pos.x = 5; player.jumpBase = 5; p.pos.y = 6; p.pos.z = 4
-                    player.state = PLAYERSTATE.FALLING
-                    SCENE = 1
-                    gameTime = 0
-                    include 'lv1.lua'
-                end
-            end -- PLAYERSTATE.NORMAL
-        else 
-            player.jumpReleased = true
-        end
+        
     end -- end vr mode input
     
     -- reset rotation within proper range
