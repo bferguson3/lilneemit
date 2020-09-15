@@ -16,8 +16,10 @@ local lg = lovr.graphics
 local pcol = EGA[16]
 
 renderTitle = function () 
-    player.rot = -1.55
-    player.yaw = 0
+    if DESKTOP then 
+        player.rot = -1.55
+        player.yaw = 0
+    end
     if totalFrames % 20 == 0 then 
         pcol = EGA[math.random(1, 16)] end
     lg.setColor(pcol)

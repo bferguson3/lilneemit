@@ -9,7 +9,7 @@ include 'src/getInput.lua'
 include 'src/renderScene.lua'
 
 -- VERSION OPTIONS -- 
-DESKTOP = 1 -- set to 0 for HMD based input
+DESKTOP = 0 -- set to 0 for HMD based input
 INTEL = false 
 EDITMODE = false
 
@@ -39,7 +39,7 @@ player = {
     fallBase = 0.0,
     hmd_orient = {},
     actual_height = 170,
-    yaw = 2,
+    yaw = 0,
     jumpReleased = true,
     gemPressed = false
 }
@@ -49,7 +49,7 @@ playerYDelta = 0.0
 player.pos = { x = 0.0, y = 0.0, z = 0.0 }
 player.scaledPos = {}
 --hmdOffset = { x = 0, y = -1.0, z = 0 }
-player.rot = math.pi*(1/2)
+player.rot = 0.0--math.pi*(1/2)
 worldScale = 1.0
 local lightBlob = nil
 lightPos = { 0.0, 0.0, 0.0 }
@@ -213,7 +213,7 @@ function lovr.load()
     music:play()
     --lovr.graphics.setDepthTest('greater', true)
     lovr.graphics.setCullingEnabled(true)
-
+    SCENE = 0
 end
  
 function lovr.mirror()
@@ -306,6 +306,7 @@ function lovr.update(dT)
     
     -- Create camera projection based on scaled world and headset offsets
     local hof = (lp.actual_height - 170.0)/100.0
+    
     camera = lovr.math.newMat4():lookAt(
         vec3(lp.scaledPos.x, lp.scaledPos.y + hof, lp.scaledPos.z),
         vec3(lp.scaledPos.x + math.cos(lp.rot), 
@@ -353,6 +354,7 @@ function lovr.update(dT)
         print('WARNING - Headset driver failed to load')
         --specShader:send('viewPos', { player.pos.x, player.pos.y, player.pos.z })
     end
+    
 end
 
 SCENE = 0

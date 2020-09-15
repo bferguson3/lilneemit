@@ -8,7 +8,7 @@ function GetInput(dT)
     local playerRotSpd = 2
     local playerWalkSpd = 5
     
-    if lovr.mouse and (SCENE > 0) then 
+    if lovr.mouse and (SCENE > 0) and (DESKTOP==1) then 
         local mx, my = lovr.mouse.getPosition()
         local deltax, deltay = (mx-pmx), (my-pmy)
         pmx, pmy = mx, my 
@@ -152,6 +152,10 @@ function GetInput(dT)
 
     -- ** VR Mode input **
     if DESKTOP == 0 then  
+        hands = lovr.headset.getHands()
+        for i,h in ipairs(hands) do 
+            print(h)
+        end
         if lovr.headset.isDown('right', 'touchpad') then
             local tpx, tpy = lovr.headset.getAxis('right', 'touchpad')
             if tpy > 0.5 then 
