@@ -71,7 +71,7 @@ renderScene = function (deltaTime)
     lovr.graphics.setShader() -- Reset to default/unlit
     
     
-    worldLights.drawPointLights()
+    --worldLights.drawPointLights()
     -- skybox
     -- todo
 

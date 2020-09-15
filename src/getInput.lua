@@ -95,6 +95,8 @@ function GetInput(dT)
                     end -- PLAYERSTATE.NORMAL
                 else 
             --editmode? 
+                    gameTime = 0
+                    --totalFrames = 0
                     if lovr.keyboard.isDown('space') then 
                         p.pos.y = p.pos.y + (dT * playerWalkSpd) 
                     end

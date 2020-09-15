@@ -208,7 +208,9 @@ function lovr.load()
     sfxGem = lovr.audio.newSource('gem.ogg', 'static')
     sfxLvlbeat = lovr.audio.newSource('lvlbeat.ogg', 'static')
     
-
+    music = lovr.audio.newSource('music.ogg', 'static')
+    music:setLooping(true)
+    music:play()
     --lovr.graphics.setDepthTest('greater', true)
     lovr.graphics.setCullingEnabled(true)
 
@@ -283,9 +285,14 @@ function lovr.update(dT)
     
     -- LIGHTING
     -- quick animation
-    worldLights.lights[1].position[1] = 4*math.sin(totalFrames/120)
-    worldLights.lights[2].position[1] = 4*math.cos(totalFrames/120)
-    worldLights.lights[3].position[2] = 4*math.sin(totalFrames/120)
+    for i=1,3 do 
+        worldLights.lights[i].position[1] = lp.pos.x 
+        worldLights.lights[i].position[2] = lp.pos.y + 2
+        worldLights.lights[i].position[3] = lp.pos.z
+    end
+    worldLights.lights[1].position[1] = lp.pos.x + 4*math.sin(totalFrames/120)
+    worldLights.lights[2].position[1] = lp.pos.x + 4*math.cos(totalFrames/120)
+    worldLights.lights[3].position[2] = lp.pos.y + 4*math.sin(totalFrames/120)
     
     lightBlob:send('sunDirection', sunDirection)
     lightBlob:send('pointLightCount', worldLights.getLightCount()) 
