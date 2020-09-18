@@ -174,31 +174,20 @@ function GetInput(dT)
         else 
             player.jumpReleased = true
         end
-        if lovr.headset.isDown('right', 'touchpad') then
-            local tpx, tpy = lovr.headset.getAxis('right', 'touchpad')
-            --print(tpx, tpy)
-            --[[
-            if tpy > 0.5 then 
-                p.pos.x = p.pos.x - playerWalkSpd*(dT)*(math.cos(-p.facing))
-                p.pos.z = p.pos.z - playerWalkSpd*(dT)*(math.sin(-p.facing))    
-            elseif tpx > 0.5 then 
-                p.pos.x = p.pos.x + playerWalkSpd*(dT)*(math.cos(-p.facing+(math.pi/2)))
-                p.pos.z = p.pos.z + playerWalkSpd*(dT)*(math.sin(-p.facing+(math.pi/2)))
-            elseif tpx < -0.5 then 
-                p.pos.x = p.pos.x + playerWalkSpd*(dT)*(math.cos(-p.facing-(math.pi/2)))
-                p.pos.z = p.pos.z + playerWalkSpd*(dT)*(math.sin(-p.facing-(math.pi/2)))
-            ]]
-            if tpy <= 0.6 then
+        --if lovr.headset.isDown('right', 'touchpad') then
+            local tpx, tpy = lovr.headset.getAxis('right', 'thumbstick')
+            
+            if tpy > 0.6 then
                 --forward
                 p.pos.x = p.pos.x + playerWalkSpd*(dT)*(math.cos(-p.facing-(math.pi/2)))
                 p.pos.z = p.pos.z + playerWalkSpd*(dT)*(math.sin(-p.facing-(math.pi/2)))
-            elseif tpy > 0.6 then
+            elseif tpy < -0.6 then
                 --back 
-                    p.pos.x = p.pos.x + playerWalkSpd*(dT)*(math.cos(-p.facing+(math.pi/2)))
-                    p.pos.z = p.pos.z + playerWalkSpd*(dT)*(math.sin(-p.facing+(math.pi/2)))
+                p.pos.x = p.pos.x + playerWalkSpd*(dT)*(math.cos(-p.facing+(math.pi/2)))
+                p.pos.z = p.pos.z + playerWalkSpd*(dT)*(math.sin(-p.facing+(math.pi/2)))
             end
             
-        end 
+        --end 
         
     end -- end vr mode input
     

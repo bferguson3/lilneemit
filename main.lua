@@ -9,7 +9,7 @@ include 'src/getInput.lua'
 include 'src/renderScene.lua'
 
 -- VERSION OPTIONS -- 
-DESKTOP = 1 -- set to 0 for HMD based input
+DESKTOP = 0 -- set to 0 for HMD based input
 INTEL = false 
 EDITMODE = false
 
