@@ -126,7 +126,7 @@ level = --** Gem Output **
     platform_size=5,
     },
     [18] = {
-    pos={x=-1.7,y=42.8,z=8.1},
+    pos={x=-1.7,y=39.8,z=8.1},
     platform_ofs=5,
     platform_size=5,
     },

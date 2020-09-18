@@ -174,7 +174,7 @@ function GetInput(dT)
         else 
             player.jumpReleased = true
         end
-        --if lovr.headset.isDown('right', 'touchpad') then
+        --if lovr.headset.isDown('right', 'togit uchpad') then
             local tpx, tpy = lovr.headset.getAxis('right', 'thumbstick')
             
             if tpy > 0.6 then
